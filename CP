@@ -1,0 +1,53 @@
+#include<stdio.h>
+int main(int argc, const char *argv[])
+{
+	if(3!=argc)
+	{
+		printf("User: ./CP dest src\n");
+		return 0;
+	}
+	char num=0;
+	//读打开dest，写打开src
+	//src存在，则提醒是否覆盖
+	//二进制 一边读一边写
+	//关闭文件
+	FILE* fwp = fopen(argv[2],"r");
+	if(NULL!=fwp)
+	{
+		printf("文件已经存在是否覆盖?\n");
+		char cmd=getchar();
+
+		if('y'!=cmd&&'Y'!=cmd)
+		{
+			printf("拷贝停止\n");
+			fclose(fwp);
+			return 0;
+		}
+		
+		fwp = fopen(argv[2],"w");
+		if(NULL==fwp)
+		{
+			printf("权限不足\n");
+			return 0;
+		}
+	}
+	FILE* frp = fopen(argv[1],"r");
+	if(NULL ==frp||NULL==fwp)
+	{
+		perror("fopen");
+		return 1;
+	}
+	char buf[256]={};
+	int flag=1;
+	while(0<(flag=fread(&buf,1,sizeof(buf),frp)))
+	{
+	fwrite(&buf,1,flag,fwp);
+	}
+
+	fclose(frp);
+	fclose(fwp);
+
+
+
+	return 0;
+}
