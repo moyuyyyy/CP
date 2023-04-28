@@ -1,0 +1,85 @@
+#include<stdio.h>
+#include<unistd.h>
+#include<stdlib.h>
+#include<sys/socket.h>
+#include<sys/types.h>
+#include<netinet/in.h>
+#include<string.h>
+#include<arpa/inet.h>
+
+typedef struct sockaddr* SP;
+
+void server_cli(int cli_fd,const struct sockaddr_in* cli_addrp)
+{
+	char buf[4096] = {};
+	size_t buf_size = sizeof(buf);
+	for(;;)
+	{
+		//接受请求
+		
+		//响应请求
+		strcat(buf,"：form server");
+	}
+	//关闭socket
+	close(cli_fd);
+	exit(EXIT_SUCCESS);
+}
+
+
+int main(int argc, const char *argv[])
+{
+	//创建socket对象
+	int sockfd = socket(AF_INET,SOCK_STREAM,0);
+	if( 0 > sockfd)
+	{
+		perror("socket");
+		return EXIT_FAILURE;
+	}
+
+	//准备通信地址
+	struct sockaddr_in addr = {};
+	addr.sin_family = AF_INET;
+	addr.sin_port = htons(5566);
+	addr.sin_addr.s_addr = inet_addr("47.59.229.46");//公网ip
+	socklen_t addrlen = sizeof(addr);
+
+	//连接服务器
+	if(connect(sockfd,(SP)&addr,addrlen))
+	{
+		perror("connect");
+		return EXIT_FAILURE;
+	}
+
+	char buf[4096] = {};
+
+	size_t buf_size = sizeof(buf);
+
+	for(;;)
+	{
+		printf(">>>");
+		scanf("%s",buf);
+		int ret = send(cli_fd,buf,strlen(buf)+1,0);
+		if(0 > ret)
+		{
+			printf("服务器正在升级，请稍等!\n");
+			break;
+		}
+		if(0 == strncmp(buf,"quit",4))
+		{
+			printf("结束通信\n");
+			break;
+		}
+		//接收响应
+		int ret = recv(cli_fd,buf,buf_size,0);
+		if(0 >= ret )
+		{
+			printf("服务器正在升级，请稍等!\n");
+			break;
+		}
+		printf("recv：%s  bits：%d\n",buf,ret);
+
+	}
+	//关闭socket
+	close(sockfd);
+	return 0;
+}
